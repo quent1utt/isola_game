@@ -1,0 +1,357 @@
+Option Explicit
+
+Sub Version2_Isola()
+
+Dim ligne As Integer
+Dim ligneJ1 As Integer
+Dim ligneJ2 As Integer
+Dim colonne As Integer
+Dim colonneJ1 As Integer
+Dim colonneJ2 As Integer
+Dim jouer As Boolean
+Dim jouer1 As Boolean
+Dim jouer2 As Boolean
+Dim deplacement As Boolean
+Dim inter As Integer
+Dim suppression As Boolean
+Dim indiceligne As Integer
+Dim indicecolonne As Integer
+Dim nbligne As Integer
+Dim nbcolonne As Integer
+Dim modejeu As Integer
+
+'initialisation du plateau
+
+Range("A1:ALZ1000").ClearContents
+Range("A1:ALZ1000").Interior.ColorIndex = 2
+Range("A1:ALZ1000").Borders.Value = 0
+MsgBox "Veuillez saisir un nombre de lignes inférieur ou égale au nombre de colonnes pour le plateau de jeu", vbOKOnly + vbInformation, "Isola by Quentin Letellier"
+nbligne = InputBox("Saisir le nombre de lignes du plateau (<1000)", "Isola by Quentin Letellier")
+nbcolonne = InputBox("Saisir le nombre de colonnes du plateau (<1000)", "Isola by Quentin Letellier")
+Cells(1, 1).Value = "ISOLA V2"
+Cells(1, 1).Interior.ColorIndex = 33
+Cells(1, 1).Font.ColorIndex = 2
+
+
+For ligne = 1 To (nbligne + 1)
+    For colonne = 1 To (nbcolonne + 1)
+        Range(Cells(1, 1), Cells(ligne, colonne)).Borders.Value = 1
+        Range(Cells(1, 1), Cells(ligne, colonne)).HorizontalAlignment = xlCenter
+        Range(Cells(1, 1), Cells(ligne, colonne)).VerticalAlignment = xlCenter
+        Range(Cells(1, 1), Cells(ligne, colonne)).Font.ColorIndex = 1
+    Next
+Next
+
+For ligne = 2 To (nbligne + 1)
+    Range("A" & ligne).Value = ligne - 1
+    Range("A" & ligne).Interior.ColorIndex = 33
+    Range("A" & ligne).RowHeight = 30
+Next
+ 
+For colonne = 2 To (nbcolonne + 1)
+    Cells(1, colonne).Value = colonne - 1
+    Cells(1, colonne).Interior.ColorIndex = 33
+Next
+
+For colonne = 1 To (nbcolonne + 2)
+    Cells(nbligne + 2, colonne).Value = 1
+    Cells(nbligne + 2, colonne).Font.ColorIndex = 2
+Next
+
+For ligne = 1 To (nbligne + 2)
+    Cells(ligne, nbcolonne + 2).Value = 1
+    Cells(ligne, nbcolonne + 2).Font.ColorIndex = 2
+Next
+
+If (nbligne Mod 2 = 0) Then
+    colonneJ1 = 2
+    ligneJ1 = (Int(nbligne / 2) + 1) + 1
+    Cells(ligneJ1, colonneJ1).Value = "Pion 1"
+    colonneJ2 = nbcolonne + 1
+    ligneJ2 = (Int(nbligne / 2) + 1)
+    Cells(ligneJ2, colonneJ2).Value = "Pion 2"
+Else
+    colonneJ1 = 2
+    ligneJ1 = (Int(nbligne / 2) + 1) + 1
+    Cells(ligneJ1, colonneJ1).Value = "Pion 1"
+    colonneJ2 = nbcolonne + 1
+    ligneJ2 = (Int(nbligne / 2) + 1) + 1
+    Cells(ligneJ2, colonneJ2).Value = "Pion 2"
+End If
+
+'Choix du mode de jeu
+
+MsgBox "Voici les modes de jeu :" & Chr(10) & "1 = Jouer contre l'ordinateur" & Chr(10) & "2 = Jouer contre un autre joueur", vbInformation, "Isola by Quentin Letellier"
+modejeu = InputBox("Veuillez choisir le mode de jeu", "Isola by Quentin Letellier")
+
+'Début de la partie
+
+jouer1 = True
+jouer2 = True
+
+If (modejeu = 2) Then
+
+'Sous algo Vérifier (Vérification si le joueur 1 peut jouer)
+
+    Do While jouer1 = True And jouer2 = True
+        jouer1 = False
+        For ligne = (ligneJ1 - 1) To (ligneJ1 + 1)
+            For colonne = (colonneJ1 - 1) To (colonneJ1 + 1)
+                If Cells(ligne, colonne).Value = 0 Then
+                    jouer1 = True
+                End If
+            Next
+        Next
+ 
+    If jouer1 = True And jouer2 = True Then
+    MsgBox "C'est au tour du Joueur 1", , "Isola by Quentin Letellier"
+    
+'Sous Algo Déplacer (Déplacement du pion 1)
+
+    deplacement = False
+ 
+    Do While deplacement = False
+        ligne = InputBox("Saisir une ligne où vous souhaitez placer votre pion", "Isola by Quentin Letellier")
+        colonne = InputBox("Saisir une colonne où vous souhaitez placer votre pion", "Isola by Quentin Letellier")
+
+    If (Abs(ligneJ1 - (ligne + 1)) = 1 Or Abs(ligneJ1 - (ligne + 1)) = 0) And (Abs(colonneJ1 - (colonne + 1)) = 1 Or Abs(colonneJ1 - (colonne + 1)) = 0) And (ligne < nbligne + 1) And (colonne < nbcolonne + 1) And (Cells(ligne + 1, colonne + 1) = 0) And ((ligne + 1 <> ligneJ1) Or (colonne + 1 <> colonneJ1)) And (colonne >= 1) And (ligne >= 1) Then
+        deplacement = True
+    Else
+        MsgBox "Déplacement impossible, Recommencez", vbCritical, "Isola by Quentin Letellier"
+    End If
+    Loop
+ 
+    inter = ligne + 1
+    ligne = ligneJ1
+    ligneJ1 = inter
+    inter = colonne + 1
+    colonne = colonneJ1
+    colonneJ1 = inter
+    Cells(ligne, colonne).ClearContents
+    Cells(ligneJ1, colonneJ1).Value = "Pion 1"
+
+'Sous Algo Supprimer (Suppression d'une case par le joueur 1)
+
+    suppression = False
+    Do While suppression = False
+        indiceligne = InputBox("Saisir la ligne de la case à supprimer", "Isola by Quentin Letellier")
+        indicecolonne = InputBox("Saisir la colonne de la case à supprimer", "Isola by Quentin Letellier")
+  
+    If (Cells(indiceligne + 1, indicecolonne + 1) = 0) And (indiceligne <= nbligne + 1) And (indicecolonne <= nbcolonne + 1) Then
+        suppression = True
+    Else
+        MsgBox "Suppression impossible, Recommencez", vbCritical, "Isola by Quentin Letellier"
+    End If
+    Loop
+
+    Cells(indiceligne + 1, indicecolonne + 1) = 10
+    Cells(indiceligne + 1, indicecolonne + 1).Interior.ColorIndex = 1
+
+    End If
+
+'Fin du tour pour le joueur 1
+'Sous algo Vérifier (Vérification si le joueur 2 peut jouer)
+
+    jouer2 = False
+        For ligne = (ligneJ2 - 1) To (ligneJ2 + 1)
+            For colonne = (colonneJ2 - 1) To (colonneJ2 + 1)
+                If Cells(ligne, colonne).Value = 0 Then
+                    jouer2 = True
+                End If
+            Next
+        Next
+
+    If jouer1 = True And jouer2 = True Then
+    MsgBox "C'est au tour du Joueur 2", , "Isola by Quentin Letellier"
+
+'Sous Algo Déplacer (Déplacement du pion 2)
+
+    deplacement = False
+ 
+    Do While deplacement = False
+        ligne = InputBox("Saisir une ligne où vous souhaitez placer votre pion", "Isola by Quentin Letellier")
+        colonne = InputBox("Saisir une colonne où vous souhaitez placer votre pion", "Isola by Quentin Letellier")
+
+       If (Abs(ligneJ2 - (ligne + 1)) = 1 Or Abs(ligneJ2 - (ligne + 1)) = 0) And (Abs(colonneJ2 - (colonne + 1)) = 1 Or Abs(colonneJ2 - (colonne + 1)) = 0) And (ligne < nbligne + 1) And (colonne < nbcolonne + 1) And (Cells(ligne + 1, colonne + 1) = 0) And ((ligne + 1 <> ligneJ2) Or (colonne + 1 <> colonneJ2)) And (colonne >= 1) And (ligne >= 1) Then
+           deplacement = True
+       Else
+           MsgBox "Déplacement impossible, Recommencez", vbCritical, "Isola by Quentin Letellier"
+       End If
+    Loop
+ 
+    inter = ligne + 1
+    ligne = ligneJ2
+    ligneJ2 = inter
+    inter = colonne + 1
+    colonne = colonneJ2
+    colonneJ2 = inter
+    Cells(ligne, colonne).ClearContents
+    Cells(ligneJ2, colonneJ2).Value = "Pion 2"
+
+'Sous Algo Supprimer (Suppression d'une case par le joueur 2)
+
+    suppression = False
+    Do While suppression = False
+        indiceligne = InputBox("Saisir la ligne de la case à supprimer", "Isola by Quentin Letellier")
+        indicecolonne = InputBox("Saisir la colonne de la case à supprimer", "Isola by Quentin Letellier")
+  
+       If (Cells(indiceligne + 1, indicecolonne + 1) = 0) And (indiceligne <= nbligne + 1) And (indicecolonne <= nbcolonne + 1) Then
+           suppression = True
+       Else
+           MsgBox "Suppression impossible, Recommencez", vbCritical, "Isola by Quentin Letellier"
+       End If
+    Loop
+
+    Cells(indiceligne + 1, indicecolonne + 1) = 10
+    Cells(indiceligne + 1, indicecolonne + 1).Interior.ColorIndex = 1
+
+    End If
+    
+'Fin du tour pour le joueur 2
+
+    Loop
+'Fin du tour général
+'Vérification si l'un des joueurs a gagné
+ 
+    If jouer1 = False Then
+        MsgBox "Fin de la partie" & Chr(10) & "Le joueur 2 a gagné !", vbOKOnly, "Isola by Quentin Letellier"
+    Else
+        MsgBox "Fin de la partie" & Chr(10) & "Le joueur 1 a gagné !", vbOKOnly, "Isola by Quentin Letellier"
+    End If
+
+'Mode de jeu contre l'ordinateur
+
+Else
+If (modejeu = 1) Then
+
+Do While jouer1 = True And jouer2 = True
+
+'Sous algo Vérifier (Vérification si le joueur 1 peut jouer)
+
+        jouer1 = False
+        For ligne = (ligneJ1 - 1) To (ligneJ1 + 1)
+            For colonne = (colonneJ1 - 1) To (colonneJ1 + 1)
+                If Cells(ligne, colonne).Value = 0 Then
+                    jouer1 = True
+                End If
+            Next
+        Next
+ 
+    If jouer1 = True And jouer2 = True Then
+    MsgBox "C'est au tour du Joueur 1", , "Isola by Quentin Letellier"
+    
+'Sous Algo Déplacer (Déplacement du pion 1)
+
+    deplacement = False
+ 
+    Do While deplacement = False
+        ligne = InputBox("Saisir une ligne où vous souhaitez placer votre pion", "Isola by Quentin Letellier")
+        colonne = InputBox("Saisir une colonne où vous souhaitez placer votre pion", "Isola by Quentin Letellier")
+
+    If (Abs(ligneJ1 - (ligne + 1)) = 1 Or Abs(ligneJ1 - (ligne + 1)) = 0) And (Abs(colonneJ1 - (colonne + 1)) = 1 Or Abs(colonneJ1 - (colonne + 1)) = 0) And (ligne < nbligne + 1) And (colonne < nbcolonne + 1) And (Cells(ligne + 1, colonne + 1) = 0) And ((ligne + 1 <> ligneJ1) Or (colonne + 1 <> colonneJ1)) And (colonne >= 1) And (ligne >= 1) Then
+        deplacement = True
+    Else
+        MsgBox "Déplacement impossible, Recommencez", vbCritical, "Isola by Quentin Letellier"
+    End If
+    Loop
+ 
+    inter = ligne + 1
+    ligne = ligneJ1
+    ligneJ1 = inter
+    inter = colonne + 1
+    colonne = colonneJ1
+    colonneJ1 = inter
+    Cells(ligne, colonne).ClearContents
+    Cells(ligneJ1, colonneJ1).Value = "Pion 1"
+
+'Sous Algo Supprimer (Suppression d'une case par le joueur 1)
+
+    suppression = False
+    Do While suppression = False
+        indiceligne = InputBox("Saisir la ligne de la case à supprimer", "Isola by Quentin Letellier")
+        indicecolonne = InputBox("Saisir la colonne de la case à supprimer", "Isola by Quentin Letellier")
+  
+    If (Cells(indiceligne + 1, indicecolonne + 1) = 0) And (indiceligne <= nbligne + 1) And (indicecolonne <= nbcolonne + 1) Then
+        suppression = True
+    Else
+        MsgBox "Suppression impossible, Recommencez", vbCritical, "Isola by Quentin Letellier"
+    End If
+    Loop
+
+    Cells(indiceligne + 1, indicecolonne + 1) = 10
+    Cells(indiceligne + 1, indicecolonne + 1).Interior.ColorIndex = 1
+
+    End If
+
+'Fin du tour pour le joueur 1
+'Sous algo Vérifier (Vérification si l'ordinateur peut jouer)
+
+
+    jouer2 = False
+        For ligne = (ligneJ2 - 1) To (ligneJ2 + 1)
+            For colonne = (colonneJ2 - 1) To (colonneJ2 + 1)
+                If Cells(ligne, colonne).Value = 0 Then
+                    jouer2 = True
+                End If
+            Next
+        Next
+
+    If jouer1 = True And jouer2 = True Then
+    MsgBox "C'est au tour de l'Ordinateur", , "Isola by Quentin Letellier"
+    
+'Sous Algo Déplacer (Déplacement aléatoire du pion de l'ordinateur)
+
+    deplacement = False
+ 
+    Do While deplacement = False
+        ligne = Int((nbligne * Rnd) + 1)
+        colonne = Int((nbcolonne * Rnd) + 1)
+
+       If (Abs(ligneJ2 - (ligne + 1)) = 1 Or Abs(ligneJ2 - (ligne + 1)) = 0) And (Abs(colonneJ2 - (colonne + 1)) = 1 Or Abs(colonneJ2 - (colonne + 1)) = 0) And (ligne < nbligne + 1) And (colonne < nbcolonne + 1) And (Cells(ligne + 1, colonne + 1) = 0) And ((ligne + 1 <> ligneJ2) Or (colonne + 1 <> colonneJ2)) And (colonne >= 1) And (ligne >= 1) Then
+           deplacement = True
+       End If
+    Loop
+ 
+    inter = ligne + 1
+    ligne = ligneJ2
+    ligneJ2 = inter
+    inter = colonne + 1
+    colonne = colonneJ2
+    colonneJ2 = inter
+    Cells(ligne, colonne).ClearContents
+    Cells(ligneJ2, colonneJ2).Value = "Pion 2"
+
+'Sous Algo Supprimer (Suppression aléatoire d'une case par l'ordinateur)
+
+    suppression = False
+    Do While suppression = False
+        indiceligne = Int((nbligne * Rnd) + 1)
+        indicecolonne = Int((nbcolonne * Rnd) + 1)
+  
+       If (Cells(indiceligne + 1, indicecolonne + 1) = 0) And (indiceligne <= nbligne + 1) And (indicecolonne <= nbcolonne + 1) Then
+           suppression = True
+       End If
+       
+    Loop
+
+    Cells(indiceligne + 1, indicecolonne + 1) = 10
+    Cells(indiceligne + 1, indicecolonne + 1).Interior.ColorIndex = 1
+
+    End If
+'Fin du tour pour l'ordinateur
+    Loop
+'Fin du tour général
+'Vérification si l'un des joueurs a gagné
+
+    If jouer1 = False Then
+        MsgBox "Fin de la partie" & Chr(10) & "L'ordinateur a gagné !", vbOKOnly, "Isola by Quentin Letellier"
+    Else
+        MsgBox "Fin de la partie" & Chr(10) & "Le joueur 1 a gagné !", vbOKOnly, "Isola by Quentin Letellier"
+    End If
+
+Else
+
+MsgBox "Veuillez saisir un mode de jeu correct", vbExclamation, "Isola by Quentin Letellier"
+End If
+End If
+End Sub
